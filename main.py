@@ -20,6 +20,8 @@ class QmlSer(QObject):
 
         self.cmbPort = self.win.findChild(QObject, 'cmbPort')
         self.btnOpen = self.win.findChild(QObject, 'btnOpen')
+        self.lblTip = self.win.findChild(QObject, 'lblTip')
+
 
         portsStr = []
         for port, desc, hwid in list_ports.comports():
@@ -48,31 +50,29 @@ class QmlSer(QObject):
     def on_btnOpen_clicked(self):
         if not self.ser.is_open:
             try:
-                self.ser.timeout = 1
-                self.ser.xonxoff = 0
-                self.ser.port = self.cmbPort.property('currentText')[:self.cmbPort.property('currentText').index(' ')]
-                self.ser.parity = self.cmbParity.property('currentText')[0]
-                self.ser.baudrate = int(self.cmbBaud.property('currentText'))
-                self.ser.bytesize = int(self.cmbData.property('currentText'))
-                self.ser.stopbits = int(self.cmbStop.property('currentText'))
-                self.ser.open()
+                 self.ser= Serial(self.cmbPort.property('currentText'), 115200)
             except Exception as e:
                 print(e)
+                self.lblTip.setProperty("text", self.tr('打开串口出错:\n %s' %(e)))
             else:
-                self.btnOpen.setProperty('text', '关闭串口')
+                self.btnOpen.setProperty('text', self.tr('关闭串口'))
         else:
             self.ser.close()
-
-            self.btnOpen.setProperty('text', '打开串口')
+            self.btnOpen.setProperty('text', self.tr('打开串口'))
 
     @QtCore.Slot()
     def on_closed(self):
         self.ser.close()
-
         self.conf.set('serial', 'port',     self.cmbPort.property('currentText'))
         self.conf.set('serial', 'baudrate', "115200")
-
         self.conf.write(open('setting.ini', 'w'))
+
+    @QtCore.Slot()
+    def on_btnRead_clicked(self):
+        if self.ser.is_open:
+            if self.ser.in_waiting > 0:
+                bytes = self.ser.read(self.ser.in_waiting)
+                print(bytes.decode('latin'))
 
 
 if __name__ == '__main__':

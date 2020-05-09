@@ -62,15 +62,24 @@ ApplicationWindow {
             }
 
             Button{
+                objectName: "btnOpen"
+
                 text:qsTr("打开")
                 onClicked: Ser.on_btnOpen_clicked()
 
             }
         }
 
+        Label{
+            objectName: "lblTip"
+			Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+        }
+
         Button{
             text:qsTr("读取")
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            onClicked: Ser.on_btnRead_clicked()
+
         }
     }
 
